@@ -31,38 +31,25 @@
 
       <v-container>
 
-        <v-row>
-
-          <v-col cols="6" md="3">
-            <CardCompVue />
+        <v-row v-if="pokemonsList!=''">
+          <v-col cols="6" md="3" v-for="poke in pokemonsList" :key="poke.id" >
+            <CardCompVue :poke="poke" />
           </v-col>
-
-          <v-col cols="6" md="3">
-            <CardCompVue />
-          </v-col>
-
-          <v-col cols="6" md="3">
-            <CardCompVue />
-          </v-col>
-
-          <v-col cols="6" md="3">
-            <CardCompVue />
-          </v-col>
-
-          <v-col cols="6" md="3">
-            <CardCompVue />
-          </v-col>
-
         </v-row>
+        <v-row v-else>
+          <v-img src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca.gif" height="100"/>
+        </v-row>
+
+        <v-pagination class="mt-10" v-model="page" @click="pagination" length="100"/>
 
       </v-container>
     </v-main>
-
   </v-app>
 </template>
   
 <script>
 import CardCompVue from '@/components/CardComp.vue'
+import api from '@/services/api'
 
 export default {
   name: 'DashView',
@@ -72,13 +59,40 @@ export default {
   },
 
   mounted() {
-    this.drawerControll = true
+    this.all()
+    this.drawerControll = false,
+    this.pokemonsList={}
   },
 
+  methods: {
+    pagination(){
+      this.pokemonsList='';
+      api.all(`pokemon/?limit=12&offset=`+this.page)
+      .then(res => {
+          this.pokemonsList = res.data.results
+        })
+        .catch(err => {
+          console.error(err)
+        })
+    },
+
+    all() {
+      api.all(`pokemon/?limit=12&offset=1`)
+        .then(res => {
+          // console.log(res.data.results)
+          this.pokemonsList = res.data.results
+        })
+        .catch(err => {
+          console.error(err)
+        })
+    }
+  },
   data() {
     return {
-      drawerControll: true,
-      theme: 'dark'
+      drawerControll: false,
+      theme: 'dark',
+      pokemonsList:{},
+      page:1,
     }
   },
 }
